@@ -1,0 +1,205 @@
+package practicas;
+
+import java.io.File;
+import javax.sound.sampled.*;
+import javax.sound.sampled.Clip;
+import javax.swing.JFileChooser;
+
+/**
+ *
+ * @author_aaron
+ */
+public class Reproductor extends javax.swing.JFrame {
+
+    private Clip clip;
+    private File file;
+    private String audio;
+    private int posPausa;
+    
+        public Reproductor() {
+        initComponents();
+        setLocationRelativeTo(null);
+        JFileChooser fileChooser = new JFileChooser();
+        int opt = fileChooser.showOpenDialog(this);
+
+            if (opt == JFileChooser.APPROVE_OPTION) {
+            audio = fileChooser.getSelectedFile().getAbsolutePath();
+            file = new File(audio);
+            Audio.setText(file.getName());
+            
+        }
+    }
+
+    
+            @SuppressWarnings("unchecked")
+            // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+            private void initComponents() {
+
+        btnReproducir = new javax.swing.JButton();
+        btnPausar = new javax.swing.JButton();
+        btnContinuar = new javax.swing.JButton();
+        btnReiniciar = new javax.swing.JButton();
+        Audio = new javax.swing.JTextField();
+        bar = new javax.swing.JProgressBar();
+
+            setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+            btnReproducir.setText("Reproducir");
+            btnReproducir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnReproducirActionPerformed(evt);
+            }
+        });
+
+            btnPausar.setText("Pausar");
+            btnPausar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                  btnPausarActionPerformed(evt);
+            }
+        });
+
+                btnContinuar.setText("Continuar");
+                btnContinuar.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    btnContinuarActionPerformed(evt);
+            }
+        });
+
+                      btnReiniciar.setText("Reiniciar");
+        btnReiniciar.addActionListener(new java.awt.event.ActionListener() {
+        public void actionPerformed(java.awt.event.ActionEvent evt) {
+        btnReiniciarActionPerformed(evt);
+            }
+        });
+
+        bar.setBackground(new java.awt.Color(102, 0, 255));
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(layout.createSequentialGroup()
+                .addGap(20, 20, 20)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(Audio)
+                    .addComponent(bar, javax.swing.GroupLayout.PREFERRED_SIZE, 328, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 55, Short.MAX_VALUE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnReproducir, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(btnContinuar, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(btnPausar, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(btnReiniciar, javax.swing.GroupLayout.Alignment.TRAILING))
+        .addContainerGap())
+        );
+        layout.setVerticalGroup(
+              layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addGroup(layout.createSequentialGroup()
+                .addContainerGap(13, Short.MAX_VALUE)
+                .addComponent(btnReproducir)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(Audio, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnPausar)
+                .addGap(40, 40, 40)
+                .addComponent(btnContinuar)
+                .addGap(4, 4, 4)
+                .addComponent(bar, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(4, 4, 4)
+                .addComponent(btnReiniciar))
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void btnReproducirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReproducirActionPerformed
+        Thread hilo;
+        hilo = new Thread(() -> {
+            try {
+                
+          clip = AudioSystem.getClip();
+          clip.open(AudioSystem.getAudioInputStream(file));
+                
+                  clip.start();
+                  int total = (int) clip.getMicrosecondLength() / 1000;
+                    int acc = 0;
+                    while (acc < total) {
+                    acc = (int) clip.getMicrosecondPosition() / 1000;
+                    int progress = (int) ((float) acc / total * 100);
+                    bar.setValue(progress);     
+                    Thread.sleep(100);
+                }
+                
+                      bar.setValue(0);
+            }         catch (Exception e) {
+                      e.printStackTrace();
+            }
+        });
+        
+        hilo.start();
+    }//GEN-LAST:event_btnReproducirActionPerformed
+
+    private void btnPausarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPausarActionPerformed
+    if(clip != null){
+                      posPausa = clip.getFramePosition();
+                      clip.stop();
+        }
+    }//GEN-LAST:event_btnPausarActionPerformed
+
+    private void btnContinuarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnContinuarActionPerformed
+                      if(clip != null){
+                      clip.setFramePosition(posPausa);
+                      clip.start();
+        }
+    }//GEN-LAST:event_btnContinuarActionPerformed
+
+    private void btnReiniciarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnReiniciarActionPerformed
+                      if (clip != null) {
+                      clip.stop();
+                      clip.setFramePosition(0);
+                      clip.start();
+        }
+    }//GEN-LAST:event_btnReiniciarActionPerformed
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+                      /* Set the Nimbus look and feel */
+                      //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+                      /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+                       * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+                         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+                    } catch (ClassNotFoundException ex) {
+                      java.util.logging.Logger.getLogger(Reproductor.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+                    } catch (InstantiationException ex) {
+                      java.util.logging.Logger.getLogger(Reproductor.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+                    } catch (IllegalAccessException ex) {
+                      java.util.logging.Logger.getLogger(Reproductor.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+                    } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+                      java.util.logging.Logger.getLogger(Reproductor.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+        //</editor-fold>
+
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(() -> {
+            new Reproductor().setVisible(true);
+        });
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JTextField Audio;
+    private javax.swing.JProgressBar bar;
+    private javax.swing.JButton btnContinuar;
+    private javax.swing.JButton btnPausar;
+    private javax.swing.JButton btnReiniciar;
+    private javax.swing.JButton btnReproducir;
+    // End of variables declaration//GEN-END:variables
+}
